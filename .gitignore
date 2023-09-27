@@ -8,3 +8,4 @@ PySciter.pyproj
 PySciter.sln
 /.vs/
 /.vscode/
+/lib/*
