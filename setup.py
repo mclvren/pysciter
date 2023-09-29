@@ -74,20 +74,25 @@ SYSTEM = system()
 _MACHINE = machine()
 
 # Simplify arm architectures
-if 'arm' not in _MACHINE:
-    MACHINE = _MACHINE
-else:
+if 'arm' in _MACHINE:
     if maxsize > 2 ** 32:
         MACHINE = 'arm64'
     else:
         MACHINE = 'arm32'
 
+# Fix Win 64 bit naming
+if 'AMD64' in _MACHINE:
+    MACHINE = 'x86_64'
+
+if 'arm' not in _MACHINE and 'AMD64' not in _MACHINE:
+    MACHINE = _MACHINE
+
 # Check supported
 if SYSTEM not in System.values():
-    raise Exception(f"System {SYSTEM} not supported!")
+    raise Exception('System {} not supported!'.format(SYSTEM))
 
 if MACHINE not in Machine.values():
-    raise Exception(f"Architecture {MACHINE} not supported!")
+    raise Exception('Architecture {} not supported!'.format(MACHINE))
 
 
 def clean_lib_folder():
@@ -134,6 +139,8 @@ def retrieve_lib(latest: bool = False):
         url += 'sciter.dll'
 
     filename = LIB_PATH.joinpath(url.rsplit('/', 1)[-1])
+
+    LIB_PATH.mkdir(parents=False, exist_ok=True)
     clean_lib_folder()
     urlretrieve(url, filename)
 
