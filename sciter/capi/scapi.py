@@ -532,7 +532,7 @@ def SciterAPI():
 
             if not dll:
                 dll = files(sciter.capi).joinpath('lib').joinpath(SCITER_DLL_NAME)
-                dll = dll if dll.is_file() else dll
+                dll = str(dll) if dll.with_suffix('.dll').is_file() else None
 
             if not dll:
                 dll = SCITER_DLL_NAME
@@ -547,7 +547,7 @@ def SciterAPI():
 
                 if not dll:
                     dll = files(sciter.capi).joinpath('lib').joinpath(dllname)
-                    dll = dll if dll.is_file() else dll
+                    dll = str(dll) if dll.with_suffix('.dll').is_file() else None
 
                 if not dll:
                     dll = dllname

@@ -1,9 +1,8 @@
 [tool.cibuildwheel]
 # Build using the latest manylinux2014 release, instead of the cibuildwheel
 # pinned version
-manylinux-x86_64-image = "quay.io/pypa/manylinux2014_x86_64:latest"
-manylinux-i686-image = "quay.io/pypa/manylinux2014_i686:latest"
-manylinux-aarch64-image = "quay.io/pypa/manylinux2014_aarch64:latest"
+manylinux-x86_64-image = 'manylinux_2_28'
+manylinux-aarch64-image = 'manylinux_2_28'
 
 # Switch to using build
 build-frontend = "build"
@@ -25,7 +24,7 @@ archs = ["x86_64", "universal2", "arm64"]
 
 # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
 [tool.cibuildwheel.linux]
-archs = ["x86_64", "i686", "aarch64"]
+archs = ["x86_64", "aarch64"]
 before-all = ["yum install gtk3 -y"]
 
 [tool.cibuildwheel.windows]
