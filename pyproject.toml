@@ -1,0 +1,32 @@
+[tool.cibuildwheel]
+# Build using the latest manylinux2014 release, instead of the cibuildwheel
+# pinned version
+manylinux-x86_64-image = "quay.io/pypa/manylinux2014_x86_64:latest"
+manylinux-i686-image = "quay.io/pypa/manylinux2014_i686:latest"
+manylinux-aarch64-image = "quay.io/pypa/manylinux2014_aarch64:latest"
+
+# Switch to using build
+build-frontend = "build"
+
+# Disable repairing wheel / Compiled binary incompatible in python <3.7
+#repair-wheel-command = []
+
+# Only build on CPython 3.7
+build = "cp37-*"
+
+# Tests
+test-command = "python -m unittest discover -s {project}/tests"
+
+# Build `universal2` and `arm64` wheels on an Intel runner.
+# Note that the `arm64` wheel and the `arm64` part of the `universal2`
+# wheel cannot be tested in this configuration.
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "universal2", "arm64"]
+
+# On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "i686", "aarch64"]
+before-all = ["yum install gtk3 -y"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64", "x86", "ARM64"]

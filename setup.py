@@ -4,9 +4,11 @@
 from shutil import rmtree
 from sys import maxsize
 from platform import system, machine
-from enum import StrEnum
+from enum import Enum
 from urllib.request import urlretrieve
 from pathlib import Path
+
+from setuptools.dist import Distribution
 
 try:
     from setuptools import setup
@@ -31,10 +33,22 @@ try:
 except ImportError:
     bdist_wheel = None
 
+
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
+    
+    def is_pure(self):
+        return False
+
+
 LIB_PATH = Path.cwd().joinpath('sciter').joinpath('capi').joinpath('lib')
 
 
-class StringEnum(StrEnum):
+class StringEnum(Enum):
     @classmethod
     def values(cls):
         """Returns a list of all the enum values."""
@@ -85,23 +99,26 @@ def clean_lib_folder():
             rmtree(path)
 
 
-def retrieve_lib():
+def retrieve_lib(latest: bool = False):
     """
-    Downloads latest platform libraries
+    Downloads platform libraries
     from https://gitlab.com/sciter-engine/sciter-js-sdk/-/tree/main/bin?ref_type=heads
+    https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/5caf429a1578d541f6dadc787f8014d1c2ebe71a/bin/linux/x64/libsciter-gtk.so
     """
-    url = 'https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/main/bin/'
+    url = ('https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/main/bin/' 
+           if latest 
+           else 'https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/5caf429a1578d541f6dadc787f8014d1c2ebe71a/bin/')
     system_type = System(SYSTEM)
     machine_type = Machine(MACHINE)
 
     if system_type == System.linux:
         url += 'linux/'
         if machine_type in (Machine.x32, Machine.x64):
-            url += 'x64/libsciter.so'
+            url += 'x64/' + ('libsciter.so' if latest else 'libsciter-gtk.so')
         if machine_type == Machine.arm32:
             url += 'arm32/libsciter-gtk.so'
         if machine_type == Machine.arm64:
-            url += 'arm64/libsciter.so'
+            url += 'arm64/' + ('libsciter.so' if latest else 'libsciter-gtk.so')
 
     if system_type == System.darwin:
         url += 'macosx/libsciter.dylib'
@@ -133,7 +150,9 @@ config = {
     'platforms': ['Windows', 'Linux', 'MacOS X', ],
     'packages': ['sciter', 'sciter.capi'],
     'package_data': {'sciter.capi': ['lib/*']},
-    'install_requires': [''],
+    'install_requires': [
+        "importlib_resources;python_version<='3.8'",
+    ],
     'scripts': [],
     'keywords': ['gui', 'sciter', 'javascript', 'tiscript', 'htmlayout', 'html', 'css', 'web', 'cross-platform', ],
     'license': 'MIT',
@@ -163,6 +182,7 @@ config = {
         'Topic :: Software Development :: Widget Sets',
     ],
     'cmdclass': {'bdist_wheel': bdist_wheel},
+    'distclass': BinaryDistribution,
     'long_description': """
 Introduction
 ============

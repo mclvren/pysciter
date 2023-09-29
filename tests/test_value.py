@@ -159,6 +159,7 @@ class TestSciterValue(unittest.TestCase):
                     self.assertTrue(xval)
                 else:
                     self.assertFalse(xval)
+        # TODO: 5.x fails
         with self.assertRaises(sciter.value.ValueError):
             item = '{item: '
             xval = value.parse(item)

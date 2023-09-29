@@ -1,6 +1,12 @@
 """Sciter C API interface."""
 from ctypes import *
-from importlib.resources import files
+
+try:
+    from importlib.resources import files
+except ImportError:  # for Python<3.8
+    from importlib_resources import files
+
+import sciter.capi
 
 from sciter.capi.sctypes import *
 from sciter.capi.scdef import *
@@ -522,7 +528,12 @@ def SciterAPI():
         # now we use the full path if found.
         import ctypes.util
         try:
-            dll = files('sciter.capi').joinpath('lib').joinpath(SCITER_DLL_NAME) or ctypes.util.find_library(SCITER_DLL_NAME)
+            dll = ctypes.util.find_library(SCITER_DLL_NAME)
+
+            if not dll:
+                dll = files(sciter.capi).joinpath('lib').joinpath(SCITER_DLL_NAME)
+                dll = dll if dll.is_file() else dll
+
             if not dll:
                 dll = SCITER_DLL_NAME
             scdll = ctypes.WinDLL(dll)
@@ -532,7 +543,12 @@ def SciterAPI():
             # try to find 3.x version
             try:
                 dllname = "sciter64.dll" if sys.maxsize > 2**32 else "sciter32.dll"
-                dll = files('sciter.capi').joinpath('lib').joinpath(dllname) or ctypes.util.find_library(dllname)
+                dll = ctypes.util.find_library(dllname)
+
+                if not dll:
+                    dll = files(sciter.capi).joinpath('lib').joinpath(dllname)
+                    dll = dll if dll.is_file() else dll
+
                 if not dll:
                     dll = dllname
                 scdll = ctypes.WinDLL(dll)
@@ -544,7 +560,16 @@ def SciterAPI():
         def find_sciter(dllname):
             import ctypes.util
             dllfile = dllname + SCITER_DLL_EXT
-            dllpath = files('sciter.capi').joinpath('lib').joinpath(dllfile) or ctypes.util.find_library(dllname)
+            dllpath = ctypes.util.find_library(dllname)
+
+            if not dllpath:
+                dllpath = files(sciter.capi).joinpath('lib').joinpath(dllfile)
+
+                if not dllpath.is_file() and SCITER_LNX:
+                    dllpath = files(sciter.capi).joinpath('lib').joinpath('libsciter-gtk.so')
+
+                dllpath = dllpath if dllpath.is_file() else dllpath
+
             if not dllpath:
                 # try $LD_LIBRARY_PATH
                 def find_in_path(dllname, envname):
