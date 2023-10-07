@@ -38,9 +38,10 @@ class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
 
     """Distribution which always forces a binary package with platform name"""
+
     def has_ext_modules(foo):
         return True
-    
+
     def is_pure(self):
         return False
 
@@ -73,18 +74,18 @@ class Machine(StringEnum):
 SYSTEM = system()
 _MACHINE = machine()
 
-# Simplify arm architectures
-if 'arm' in _MACHINE:
+# Simplify architectures
+if 'arm' in _MACHINE.lower() or 'aarch' in _MACHINE.lower():
     if maxsize > 2 ** 32:
         MACHINE = 'arm64'
     else:
         MACHINE = 'arm32'
-
-# Fix Win 64 bit naming
-if 'AMD64' in _MACHINE:
-    MACHINE = 'x86_64'
-
-if 'arm' not in _MACHINE and 'AMD64' not in _MACHINE:
+elif 'x86' in _MACHINE.lower() or 'amd' in _MACHINE.lower():
+    if maxsize > 2 ** 32:
+        MACHINE = 'x86_64'
+    else:
+        MACHINE = 'x86'
+else:
     MACHINE = _MACHINE
 
 # Check supported
@@ -107,11 +108,11 @@ def clean_lib_folder():
 def retrieve_lib(latest: bool = False):
     """
     Downloads platform libraries
-    from https://gitlab.com/sciter-engine/sciter-js-sdk/-/tree/main/bin?ref_type=heads
-    https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/5caf429a1578d541f6dadc787f8014d1c2ebe71a/bin/linux/x64/libsciter-gtk.so
+        from: https://gitlab.com/sciter-engine/sciter-js-sdk/-/tree/5caf429a1578d541f6dadc787f8014d1c2ebe71a/bin (4.4.9.3)
+        or if latest: https://gitlab.com/sciter-engine/sciter-js-sdk/-/tree/main/bin
     """
-    url = ('https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/main/bin/' 
-           if latest 
+    url = ('https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/main/bin/'
+           if latest
            else 'https://gitlab.com/sciter-engine/sciter-js-sdk/-/raw/5caf429a1578d541f6dadc787f8014d1c2ebe71a/bin/')
     system_type = System(SYSTEM)
     machine_type = Machine(MACHINE)
