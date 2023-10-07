@@ -142,6 +142,7 @@ def retrieve_lib(latest: bool = False):
 
     LIB_PATH.mkdir(parents=False, exist_ok=True)
     clean_lib_folder()
+    print('downloading sciter lib from ' + url)
     urlretrieve(url, filename)
 
 

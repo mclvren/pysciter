@@ -15,6 +15,8 @@ build = "cp37-*"
 
 # Tests
 test-command = "python -m unittest discover -s {project}/tests"
+# Skip trying to test arm64 builds on Intel Macs and win32 on win64 runner (x32 sciter.dll can't run on x64 OS)
+test-skip = "*-macosx_arm64 *-macosx_universal2:arm64 *-win32"
 
 # Build `universal2` and `arm64` wheels on an Intel runner.
 # Note that the `arm64` wheel and the `arm64` part of the `universal2`
